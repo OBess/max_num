@@ -4,26 +4,30 @@
 
 using ull = unsigned long long;
 
-template <int N, ull num>
-constexpr ull max_int()
+template <int Base, int Exp>
+class power
 {
-   if constexpr (N != 0)
-      return max_int<N - 1, num * 10 + 9>();
-   return num;
-}
+public:
+   constexpr static ull value = power<Base, Exp - 1>::value * Base;
+};
+
+template <int Base>
+class power<Base, 0>
+{
+public:
+   constexpr static ull value = 1;
+};
 
 template <int N>
 constexpr ull max_int()
 {
-   if constexpr (N > 0 && N <= 19)
-      return max_int<N - 1, 9>();
-   return 0;
+   static_assert(N > 0 && N <= 19);
+   return power<10, N>::value - 1;
 }
 
 int main()
 {
-   static_assert(max_int<-1>() == 0);
-   static_assert(max_int<0>() == 0);
+   // Simple tests
    static_assert(max_int<1>() == 9);
    static_assert(max_int<2>() == 99);
    static_assert(max_int<3>() == 999);
@@ -43,6 +47,10 @@ int main()
    static_assert(max_int<17>() == 99999999999999999);
    static_assert(max_int<18>() == 999999999999999999);
    static_assert(max_int<19>() == 9999999999999999999);
+   
+   // Tests for asserts
+   static_assert(max_int<-1>() == 0);
+   static_assert(max_int<0>() == 0);
    static_assert(max_int<20>() == 0);
    return EXIT_SUCCESS;
 }
